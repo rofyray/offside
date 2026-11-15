@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 import time
+import threading
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
@@ -13,7 +14,7 @@ from fastapi.testclient import TestClient
 from redis import Redis
 from watchtower.repository import WatchStore, PREFIX, DURATION
 from watchtower.processor import Processor, BudgetExhausted, public_url
-from watchtower.service import create_app
+from watchtower.service import create_app, run_engine
 
 URL = 'https://example.com/product'
 OWNER = 'a'*64
@@ -149,6 +150,15 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(c.delete('/watchlists/'+'b'*64+'/'+wid,headers=headers).status_code,404)
         self.assertEqual(c.delete('/watchlists/'+OWNER+'/'+wid,headers=headers).status_code,200)
         self.assertEqual(c.get('/watchlists/'+OWNER,headers=headers).json()['watches'],[])
+
+    def test_engine_failure_restarts_service_but_shutdown_does_not(self):
+        stop=threading.Event()
+        with patch("watchtower.service.os._exit") as exit_process:
+            run_engine(lambda: (_ for _ in ()).throw(RuntimeError("engine failure")),stop)
+            exit_process.assert_called_once_with(1)
+            stop.set()
+            run_engine(lambda: None,stop)
+            exit_process.assert_called_once()
 
     def test_private_sources_rejected(self):
         for url in ('http://127.0.0.1','http://169.254.169.254/latest','http://redis.railway.internal','ftp://example.com','https://x:y@example.com','https://example.com:6379'):

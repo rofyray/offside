@@ -68,5 +68,9 @@ def build_pipeline(subject, on_row):
     changes = snapshots.with_columns(changed=pw.apply(content_changed, pw.this.baseline, pw.this.snapshot))
     def changed(key, row, time, is_addition):
         if is_addition:
-            on_row(row)
+            try:
+                on_row(row)
+            except Exception:
+                # A temporary output/storage failure leaves its lease to expire and retry.
+                logging.warning("Monitoring output failed; leased work will retry", exc_info=False)
     pw.io.subscribe(changes, on_change=changed)

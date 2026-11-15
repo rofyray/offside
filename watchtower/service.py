@@ -1,5 +1,6 @@
 import hmac
 import json
+import logging
 import os
 import threading
 import time
@@ -73,6 +74,17 @@ def create_app(store, engine_health=lambda: True, lifespan=None):
     return app
 
 
+def run_engine(run, stop_event):
+    try:
+        run()
+    except Exception:
+        logging.error("Pathway engine stopped unexpectedly; restarting service", exc_info=False)
+    finally:
+        if not stop_event.is_set():
+            # Let Railway restart the process; Redis leases retain unfinished work.
+            os._exit(1)
+
+
 def main():
     import pathway as pw
     import uvicorn
@@ -81,7 +93,7 @@ def main():
     processor = Processor(store)
     subject = WatchSubject(processor)
     build_pipeline(subject, processor.process)
-    engine = threading.Thread(target=lambda: pw.run(monitoring_level=pw.MonitoringLevel.NONE), daemon=True)
+    engine = threading.Thread(target=run_engine, args=(lambda: pw.run(monitoring_level=pw.MonitoringLevel.NONE), subject.stop_event), daemon=True)
 
     @asynccontextmanager
     async def lifespan(app):
