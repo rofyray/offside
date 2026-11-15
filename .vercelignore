@@ -26,3 +26,5 @@ testing.md
 *.dc.html
 api/tests/
 scripts/
+
+watchtower/

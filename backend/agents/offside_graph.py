@@ -4,7 +4,8 @@ from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from backend.core import llm, search
 from backend.core.cache import store
-from backend.core.models import Claims, Verdict, Correction, CheckResult, CheckedClaim
+from backend.core.models import Claims, Verdict, Correction, CheckResult, CheckedClaim, Claim
+from backend.core.watchlist import BudgetExhausted
 from backend.core.scoring import repair_claims, score, label
 from backend.core.citations import validate_quotes, validate_correction
 from backend.core.rerank import rerank
@@ -18,6 +19,10 @@ class State(TypedDict, total=False):
 
 async def plan(state):
     req,run = state['request'],state['run']
+    if run.watch_claims:
+        claims = repair_claims(req.answer, [Claim.model_validate(c.model_dump()) for c in run.watch_claims])
+        await run.emit('claims.extracted',claims=claims)
+        return {'claims':claims}
     extracted = await llm.call(run,'Stepover','Extract at most eight time-sensitive factual claims. Skip opinions and timeless facts. Each text must be an exact substring with character offsets in the answer. Include one or two targeted queries and authoritative domains, without URL paths.',
                                {'answer':req.answer,'question':req.question,'today':datetime.now(timezone.utc).date()},Claims)
     claims = repair_claims(req.answer,extracted.claims)
@@ -38,6 +43,13 @@ async def investigate(state):
                 sources = rerank(flattened+advanced,claim.preferred_domains,today,prefix=claim.id+'s')
             except Exception:
                 pass
+        if run.watch_claims:
+            prior = next((c.sources for c in run.watch_claims if c.id == claim.id), [])
+            seen = set()
+            sources = [s.model_copy(deep=True) for s in [*prior, *sources] if not (str(s.url) in seen or seen.add(str(s.url)))]
+            sources = sources[:10]
+            for i, source in enumerate(sources):
+                source.id = claim.id+'s'+str(i+1)
         return sources
     evidence_tasks = [asyncio.create_task(evidence(c)) for c in claims]
     async def extract_batch():
@@ -60,6 +72,8 @@ async def investigate(state):
             sources = []
         needs_extract = claim.category in ('pricing','api_version') and any(s.official and (not claim.stated_value or claim.stated_value not in s.snippet) for s in sources)
         extracted = await extraction_task if needs_extract else {}
+        if run.watch_claims:
+            extracted = await search.extract([str(s.url) for s in sources],run)
         for source in sources:
             source.snippet = extracted.get(str(source.url)) or source.snippet
         await run.emit('evidence.ready',claim_id=claim.id,sources=sources)
@@ -127,6 +141,8 @@ async def investigate(state):
 
 async def persist(state):
     result,run = state['result'],state['run']
+    if run.budget_exhausted:
+        raise BudgetExhausted()
     await store.set('run:'+run.id,result.model_dump(mode='json'),604800)
     await run.emit('run.telemetry',telemetry=result.telemetry)
     await run.emit('run.completed',result=result)

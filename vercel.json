@@ -3,7 +3,7 @@
   "functions": {
     "api/index.py": {
       "maxDuration": 300,
-      "excludeFiles": "{node_modules/**,.next/**,api/tests/**}"
+      "excludeFiles": "{node_modules/**,.next/**,api/tests/**,watchtower/**}"
     }
   },
   "rewrites": [

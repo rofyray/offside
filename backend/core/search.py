@@ -8,6 +8,13 @@ from .config import required
 _semaphore = asyncio.Semaphore(8)
 
 async def request(path, body, run):
+    if run.credit_guard:
+        credits = len(body.get('urls', [])) if path == 'extract' else (2 if body.get('search_depth') == 'advanced' else 1)
+        try:
+            await run.credit_guard(max(1, credits))
+        except Exception:
+            run.budget_exhausted = True
+            raise
     headers = {'Content-Type':'application/json'}
     if os.getenv('TAVILY_KEYLESS') == '1' and not os.getenv('VERCEL'):
         headers['X-Tavily-Access-Mode'] = 'keyless'

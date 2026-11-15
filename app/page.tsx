@@ -1,6 +1,7 @@
 "use client";
 import { replayExample, type Example } from "./lib/replay";
 import Examples from "./components/Examples";
+import Watchlist, { WatchButton } from "./components/Watchlist";
 import Link from "next/link";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr/ArrowRight";
@@ -317,6 +318,7 @@ export default function Home() {
             {[
               ["check", "Check Answer"],
               ["ask", "Ask Models"],
+              ["watchlist", "Watchlist"],
               ["api", "API"],
             ].map(([id, name]) => (
               <button
@@ -332,13 +334,21 @@ export default function Home() {
             ))}
           </nav>
         </div>
-        <button className="primary" onClick={reset}>
+        <button
+          className="primary"
+          onClick={() => {
+            reset();
+            setView("check");
+          }}
+        >
           <Plus weight="duotone" aria-hidden="true" size={17} />
           New Check
         </button>
       </header>
       <main>
-        {view === "api" ? (
+        {view === "watchlist" ? (
+          <Watchlist />
+        ) : view === "api" ? (
           <section className="api-panel">
             <div className="eyebrow">
               <Terminal weight="duotone" aria-hidden="true" size={16} />
@@ -437,9 +447,7 @@ export default function Home() {
                   {view === "check" ? (
                     <>
                       <details>
-                        <summary>
-                          Add Context
-                        </summary>
+                        <summary>Add Context</summary>
                         <input
                           aria-label="Original question"
                           value={question}
@@ -616,6 +624,12 @@ export default function Home() {
                     >
                       Edit Answer
                     </button>
+                    {!running && !replaying && state.result && (
+                      <WatchButton
+                        key={state.result.run_id}
+                        runId={state.result.run_id}
+                      />
+                    )}
                   </div>
                   <div className="score">
                     <strong>{freshness ?? "?"}</strong>

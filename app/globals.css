@@ -1027,3 +1027,147 @@ footer > .secondary {
     font-size: 9px;
   }
 }
+
+.watchlist {
+  max-width: 1120px;
+  margin: 54px auto 80px;
+}
+.watchlist h1 {
+  margin: 20px 0;
+}
+.watch-intro {
+  max-width: 680px;
+  font-size: 17px;
+  color: var(--muted);
+}
+.watch-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-top: 28px;
+  font: 12px var(--font-mono);
+}
+.watch-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.watch-meta svg,
+.watch-empty svg {
+  color: var(--green);
+}
+.watch-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 32px;
+}
+.watch-empty {
+  margin-top: 32px;
+  max-width: 680px;
+  padding: 28px;
+}
+.watch-empty h2 {
+  margin: 14px 0 8px;
+}
+.watch-empty p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+.watch-card {
+  padding: 24px;
+  min-width: 0;
+}
+.watch-answer {
+  font-size: 18px;
+  line-height: 1.5;
+  max-height: 135px;
+  overflow: auto;
+  margin: 18px 0;
+  overflow-wrap: anywhere;
+}
+.watch-score {
+  font: 24px var(--font-mono);
+  color: var(--green);
+}
+.watch-score small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.watch-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 24px 0;
+}
+.watch-dates dt {
+  color: var(--muted);
+  font-size: 11px;
+}
+.watch-dates dd {
+  margin: 3px 0 0;
+  font: 12px var(--font-mono);
+}
+.watch-events {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0;
+  max-height: 340px;
+  overflow: auto;
+}
+.watch-events li {
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding: 16px 0;
+}
+.watch-events svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.watch-events time {
+  display: block;
+  font: 11px var(--font-mono);
+  color: var(--muted);
+  margin-top: 4px;
+}
+.watch-events p {
+  font-size: 12px;
+  margin-bottom: 0;
+  overflow-wrap: anywhere;
+}
+.watch-alert {
+  color: var(--orange);
+}
+.watch-controls {
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+.watch-controls a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.watch-action {
+  display: inline-block;
+  margin: 10px 0 0 10px;
+  vertical-align: top;
+}
+.watch-action p {
+  max-width: 280px;
+  margin: 8px 0 0;
+}
+@media (max-width: 700px) {
+  .watchlist {
+    margin: 32px 0 56px;
+  }
+  .watch-grid {
+    grid-template-columns: 1fr;
+  }
+  .watch-card {
+    padding: 18px;
+  }
+  .watch-meta {
+    gap: 12px 18px;
+  }
+}

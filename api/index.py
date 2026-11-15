@@ -1,13 +1,24 @@
 import asyncio
 from fastapi import FastAPI, Request, HTTPException
 from backend.core.http import health, guard, get_run, events
-from backend.core.models import CheckRequest, AskRequest
+from backend.core.models import CheckRequest, AskRequest, CheckedClaim
+from pydantic import Field
+from backend.core.watchlist import router, internal_request, reserve_credits, BudgetExhausted
 from backend.core.telemetry import Run
 from backend.core.config import SetupError
 from backend.core import llm
 from backend.agents.offside_graph import check
 
 app = FastAPI(title='OffSide API',docs_url='/api/py/docs',openapi_url='/api/py/openapi.json')
+app.include_router(router)
+
+@app.middleware('http')
+async def private_watchlist(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith('/api/py/watchlist'):
+        response.headers['Cache-Control'] = 'private, no-store'
+    return response
+
 app.get('/api/py/health')(health)
 app.get('/api/py/runs/{run_id}')(get_run)
 MODELS = ['claude-haiku-4-5','openai/gpt-6-luna','claude-sonnet-5-5']
@@ -19,14 +30,26 @@ async def check_route(body: CheckRequest, request: Request):
         await check(body,Run('offside',emit))
     return events(execute)
 
+class VerifyRequest(CheckRequest):
+    watch_claims: list[CheckedClaim] = Field(default_factory=list, max_length=8)
+
 @app.post('/api/py/verify')
-async def verify_route(body: CheckRequest, request: Request):
-    await guard(request,'offside')
+async def verify_route(body: VerifyRequest, request: Request):
+    monitoring = internal_request(request)
+    if not monitoring:
+        await guard(request,'offside')
     async def emit(event,data):
         pass
     try:
         async with asyncio.timeout(280):
-            return await check(body,Run('offside',emit))
+            run = Run('offside',emit)
+            if monitoring:
+                run.credit_guard = reserve_credits
+                run.watch_claims = body.watch_claims
+                body.live = False
+            return await check(body,run)
+    except BudgetExhausted:
+        raise HTTPException(429,'Daily monitoring budget reached.')
     except SetupError:
         raise HTTPException(503,'Live research is not configured yet.')
     except Exception:

@@ -10,6 +10,9 @@ class Run:
         self.telemetry = Telemetry()
         self.emit_callback = emit
         self.search_tasks = {}
+        self.credit_guard = None
+        self.budget_exhausted = False
+        self.watch_claims = []
 
     async def emit(self, event, **data):
         await self.emit_callback(event, {'run_id':self.id,'t_ms':self.elapsed(),**data})
