@@ -163,15 +163,17 @@ export default function CheckResultView({
             {answer.slice(0, 220)}
             {answer.length > 220 ? "…" : ""}
           </p>
-          <button className="secondary" onClick={onEdit}>
-            Edit Answer
-          </button>
-          {!running && !replaying && state.result && (
-            <WatchButton
-              key={state.result.run_id}
-              runId={state.result.run_id}
-            />
-          )}
+          <div className="result-actions">
+            <button className="secondary" onClick={onEdit}>
+              Edit Answer
+            </button>
+            {!running && !replaying && state.result && (
+              <WatchButton
+                key={state.result.run_id}
+                runId={state.result.run_id}
+              />
+            )}
+          </div>
         </div>
         <div className="score">
           <strong>{freshness ?? "?"}</strong>

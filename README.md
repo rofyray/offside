@@ -1,6 +1,6 @@
-# OffSide
+# <img src="public/offside-flag.svg" width="48" height="48" align="middle" alt=""> OffSide
 
-[Open OffSide](https://offside-nu.vercel.app)
+[Open OffSide](https://offside-agent.vercel.app/)
 
 AI answers can sound convincing after their facts go out of date. OffSide extracts time-sensitive claims, checks them against current web evidence, and produces a cited correction. You can paste an answer, compare answers from up to three models, or call the JSON verification API.
 
@@ -76,4 +76,6 @@ Deploy this directory to the linked Vercel project with `vercel deploy --prod`. 
 
 The hosted demo includes local snapshots. A clean clone works without them and hides the example picker.
 
-Saved links are bearer links: anyone with the URL can open them until expiry. There is no user account system. Public research is limited to six runs per ten minutes and forty per day per client. Freshness scores summarize evidence, not certainty. Undated evidence stays unplaced on the timeline. Sources can be incomplete or wrong, and citations do not replace human judgment. The app does not continuously monitor saved answers.
+Saved links are bearer links: anyone with the URL can open them until expiry. There is no user account system. Public research is limited to six runs per ten minutes and forty per day per client. Freshness scores summarize evidence, not certainty. Undated evidence stays unplaced on the timeline. Sources can be incomplete or wrong, and citations do not replace human judgment.
+
+Select **Watch Answer** on a saved result to add it to the Watchlist. You can monitor up to five answers for seven days. Pathway scans their cited sources every six hours and rechecks answers when source content changes. Watchlist access is tied to this browser; clearing cookies loses access. Monitoring shares a daily research budget, so scans may pause until the next day.

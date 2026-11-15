@@ -1148,14 +1148,18 @@ footer > .secondary {
   align-items: center;
   gap: 8px;
 }
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+}
 .watch-action {
-  display: inline-block;
-  margin: 10px 0 0 10px;
-  vertical-align: top;
+  display: contents;
 }
 .watch-action p {
-  max-width: 280px;
-  margin: 8px 0 0;
+  flex-basis: 100%;
+  margin: 0;
 }
 @media (max-width: 700px) {
   .watchlist {
