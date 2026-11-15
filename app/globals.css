@@ -992,3 +992,37 @@ footer > .secondary {
     grid-template-columns: 1fr;
   }
 }
+
+.line-grid {
+  min-width: 0;
+}
+.line-scale,
+.line-row {
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+}
+.line-row {
+  text-decoration: none;
+}
+.claim-mark {
+  text-decoration: none;
+  cursor: pointer;
+}
+.evidence-dot {
+  transform: translateX(-50%);
+}
+#claim-review {
+  scroll-margin-top: 24px;
+}
+@media (max-width: 700px) {
+  .line-scale,
+  .line-row {
+    grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+    gap: 12px;
+  }
+  .line-row small {
+    margin-right: 6px;
+  }
+  .track em {
+    font-size: 9px;
+  }
+}

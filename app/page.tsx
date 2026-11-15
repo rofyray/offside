@@ -3,18 +3,18 @@ import { replayExample, type Example } from "./lib/replay";
 import Examples from "./components/Examples";
 import Link from "next/link";
 import { useEffect, useReducer, useRef, useState } from "react";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Copy,
-  Plus,
-  Radio,
-  Square,
-  Terminal,
-} from "lucide-react";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr/ArrowRight";
+import { LinkSimple } from "@phosphor-icons/react/dist/ssr/LinkSimple";
+import { CheckCircle as Check } from "@phosphor-icons/react/dist/ssr/CheckCircle";
+import { CaretLeft as ChevronLeft } from "@phosphor-icons/react/dist/ssr/CaretLeft";
+import { CaretRight as ChevronRight } from "@phosphor-icons/react/dist/ssr/CaretRight";
+import { CopySimple as Copy } from "@phosphor-icons/react/dist/ssr/CopySimple";
+import { PlusCircle as Plus } from "@phosphor-icons/react/dist/ssr/PlusCircle";
+import { Broadcast as Radio } from "@phosphor-icons/react/dist/ssr/Broadcast";
+import { Stop as Square } from "@phosphor-icons/react/dist/ssr/Stop";
+import { TerminalWindow as Terminal } from "@phosphor-icons/react/dist/ssr/TerminalWindow";
+import { ClockClockwise } from "@phosphor-icons/react/dist/ssr/ClockClockwise";
+import { BookOpen } from "@phosphor-icons/react/dist/ssr/BookOpen";
 import Hood from "./components/Hood";
 import { initial, reduceCheck } from "./lib/reducer";
 import { postEvents, safeUrl } from "./lib/stream";
@@ -33,7 +33,7 @@ const prompts = [
     text: "GitHub Copilot is only available on paid plans. Individual developers pay $10 per month, and there is no free tier.",
   },
   {
-    label: "API version",
+    label: "API Version",
     text: "Python 3.9 is the latest stable release of Python. Python 2.7 still receives security updates from the Python Software Foundation.",
   },
   {
@@ -71,7 +71,8 @@ function MarkedAnswer({
       parts.push(answer.slice(cursor, c.span[0]));
       const index = claims.findIndex((x) => x.id === c.id);
       parts.push(
-        <button
+        <a
+          href="#claim-review"
           key={c.id}
           className={`claim-mark ${verdictClass(c.verdict)}`}
           onClick={() => select(index)}
@@ -79,7 +80,7 @@ function MarkedAnswer({
         >
           {answer.slice(...c.span)}
           <sup>{index + 1}</sup>
-        </button>,
+        </a>,
       );
       cursor = c.span[1];
     });
@@ -107,7 +108,7 @@ function Line({
   return (
     <section className="line-panel">
       <div className="row between">
-        <h2>The line</h2>
+        <h2>The Line</h2>
         <p className="muted small">
           Solid dot: newest evidence. Undated evidence stays unplaced.
         </p>
@@ -129,7 +130,8 @@ function Line({
               s.published_date ? [Date.parse(s.published_date)] : [],
             );
             return (
-              <button
+              <a
+                href="#claim-review"
                 key={c.id}
                 className={`line-row ${verdictClass(c.verdict)}`}
                 onClick={() => select(i)}
@@ -151,7 +153,7 @@ function Line({
                   )}
                   <i className="today-line" />
                 </span>
-              </button>
+              </a>
             );
           })}
         </div>
@@ -167,7 +169,7 @@ export default function Home() {
   const [official, setOfficial] = useState(true);
   const [state, dispatch] = useReducer(reduceCheck, initial);
   const [selected, setSelected] = useState(0);
-  const [tab, setTab] = useState("Corrected answer");
+  const [tab, setTab] = useState("Corrected Answer");
   const [editing, setEditing] = useState(true);
   const [notice, setNotice] = useState("");
   const [replaying, setReplaying] = useState(false);
@@ -313,8 +315,8 @@ export default function Home() {
           <Logo />
           <nav aria-label="Primary">
             {[
-              ["check", "Check an answer"],
-              ["ask", "Ask any model"],
+              ["check", "Check Answer"],
+              ["ask", "Ask Models"],
               ["api", "API"],
             ].map(([id, name]) => (
               <button
@@ -331,16 +333,16 @@ export default function Home() {
           </nav>
         </div>
         <button className="primary" onClick={reset}>
-          <Plus size={17} />
-          New check
+          <Plus weight="duotone" aria-hidden="true" size={17} />
+          New Check
         </button>
       </header>
       <main>
         {view === "api" ? (
           <section className="api-panel">
             <div className="eyebrow">
-              <Terminal size={16} />
-              For developers
+              <Terminal weight="duotone" aria-hidden="true" size={16} />
+              For Developers
             </div>
             <h1>
               A second opinion.
@@ -353,7 +355,8 @@ export default function Home() {
             </p>
             <pre>{`POST /api/py/verify\nContent-Type: application/json\n\n{\n  "answer": "The answer you want to check...",\n  "prefer_official": true,\n  "live": true\n}`}</pre>
             <a href="/api/py/docs" target="_blank" rel="noreferrer">
-              Open API reference <ArrowUpRight size={15} />
+              API Reference{" "}
+              <BookOpen weight="duotone" aria-hidden="true" size={15} />
             </a>
             <p className="muted">
               6 live runs per 10 minutes. 40 per day. Results remain available
@@ -366,8 +369,12 @@ export default function Home() {
               <section className="input-section">
                 <div className="intro">
                   <div className="eyebrow">
-                    <span className="status-dot" />A freshness check for AI
-                    answers
+                    <ClockClockwise
+                      size={18}
+                      weight="duotone"
+                      aria-hidden="true"
+                    />
+                    A freshness check for AI answers
                   </div>
                   <h1>
                     {view === "ask" ? (
@@ -404,7 +411,7 @@ export default function Home() {
                 >
                   <div className="row between">
                     <label htmlFor="answer">
-                      {view === "ask" ? "Your question" : "The answer to check"}
+                      {view === "ask" ? "Your Question" : "Answer to Check"}
                     </label>
                     <span className="mono muted">
                       {view === "ask" ? "" : "20 to 6,000 characters"}
@@ -431,8 +438,7 @@ export default function Home() {
                     <>
                       <details>
                         <summary>
-                          Add the original question{" "}
-                          <span className="muted">(optional)</span>
+                          Add Context
                         </summary>
                         <input
                           aria-label="Original question"
@@ -449,7 +455,7 @@ export default function Home() {
                             checked={live}
                             onChange={(e) => setLive(e.target.checked)}
                           />
-                          Fetch live
+                          Fetch Live
                         </label>
                         <label>
                           <input
@@ -457,13 +463,13 @@ export default function Home() {
                             checked={official}
                             onChange={(e) => setOfficial(e.target.checked)}
                           />
-                          Prefer official sources
+                          Prefer Official Sources
                         </label>
                       </div>
                     </>
                   ) : (
                     <fieldset className="model-picker">
-                      <legend>Choose up to 3 models</legend>
+                      <legend>Choose Your Models</legend>
                       {models.map((m) => (
                         <label key={m}>
                           <input
@@ -490,9 +496,9 @@ export default function Home() {
                     {running
                       ? "Researching"
                       : view === "ask"
-                        ? "Ask and compare"
-                        : "Check this answer"}
-                    <ArrowRight size={18} />
+                        ? "Compare Models"
+                        : "Check Answer"}
+                    <ArrowRight weight="duotone" aria-hidden="true" size={18} />
                   </button>
                   <p className="input-note">
                     Live web research by Tavily. Model routing by Bifrost.
@@ -503,7 +509,7 @@ export default function Home() {
             {editing && view === "check" && (
               <section className="examples">
                 <Examples onSelect={replay} />
-                <span className="eyebrow">Or try a fresh check</span>
+                <span className="eyebrow">Try a Fresh Check</span>
                 {prompts.map((p) => (
                   <button
                     key={p.label}
@@ -514,7 +520,7 @@ export default function Home() {
                     }}
                   >
                     <span>{p.label}</span>
-                    <ArrowUpRight size={16} />
+                    <ArrowRight weight="duotone" aria-hidden="true" size={16} />
                   </button>
                 ))}
                 <small className="muted">
@@ -524,7 +530,7 @@ export default function Home() {
             )}
             {running && (
               <div className="research-status" role="status">
-                <Radio size={17} />
+                <Radio weight="duotone" aria-hidden="true" size={17} />
                 {claims.length
                   ? `${claims.filter((c) => c.verdict).length} of ${claims.length} claims checked`
                   : "Stepover is reading the answer and planning searches"}
@@ -540,7 +546,7 @@ export default function Home() {
                     });
                   }}
                 >
-                  <Square size={13} />
+                  <Square weight="duotone" aria-hidden="true" size={13} />
                   Stop
                 </button>
               </div>
@@ -548,7 +554,7 @@ export default function Home() {
             {state.error && (
               <div className="error" role="alert">
                 {state.error}
-                <button onClick={() => setEditing(true)}>Edit and retry</button>
+                <button onClick={() => setEditing(true)}>Try Again</button>
               </div>
             )}
             {view === "ask" && (
@@ -574,7 +580,7 @@ export default function Home() {
                 ))}
                 {leaderboard.length > 0 && (
                   <div className="panel">
-                    <h2>Freshness leaderboard</h2>
+                    <h2>Freshness Leaderboard</h2>
                     {leaderboard.map((r, i) => (
                       <div className="leader-row" key={r.model}>
                         <b>{i + 1}</b>
@@ -608,7 +614,7 @@ export default function Home() {
                       className="secondary"
                       onClick={() => setEditing(true)}
                     >
-                      Edit answer
+                      Edit Answer
                     </button>
                   </div>
                   <div className="score">
@@ -645,7 +651,7 @@ export default function Home() {
                     <Line claims={claims} select={setSelected} />
                     <section className="result-grid">
                       <article>
-                        <h2>The answer, marked up</h2>
+                        <h2>The Answer, Marked Up</h2>
                         <MarkedAnswer
                           answer={answer}
                           claims={claims}
@@ -656,7 +662,7 @@ export default function Home() {
                           role="tablist"
                           aria-label="Result views"
                         >
-                          {["Corrected answer", "What changed", "JSON"].map(
+                          {["Corrected Answer", "What Changed", "JSON"].map(
                             (t) => (
                               <button
                                 role="tab"
@@ -679,7 +685,7 @@ export default function Home() {
                                 2,
                               )}
                             </pre>
-                          ) : tab === "What changed" ? (
+                          ) : tab === "What Changed" ? (
                             <ul className="changes">
                               {claims.map((c) => (
                                 <li key={c.id}>
@@ -710,7 +716,11 @@ export default function Home() {
                                         rel="noreferrer"
                                       >
                                         [{c.n}] {source.title}
-                                        <ArrowUpRight size={12} />
+                                        <LinkSimple
+                                          weight="duotone"
+                                          aria-hidden="true"
+                                          size={12}
+                                        />
                                       </a>
                                     </li>
                                   ) : null;
@@ -721,8 +731,12 @@ export default function Home() {
                                   className="light"
                                   onClick={() => copy(state.correction!.text)}
                                 >
-                                  <Copy size={15} />
-                                  Copy corrected answer
+                                  <Copy
+                                    weight="duotone"
+                                    aria-hidden="true"
+                                    size={15}
+                                  />
+                                  Copy Answer
                                 </button>
                                 <button
                                   className="secondary"
@@ -733,7 +747,7 @@ export default function Home() {
                                   }
                                   disabled={running}
                                 >
-                                  Share result
+                                  Share Result
                                 </button>
                               </div>
                             </>
@@ -746,7 +760,7 @@ export default function Home() {
                         </div>
                       </article>
                       {claim && (
-                        <aside className="review panel">
+                        <aside id="claim-review" className="review panel">
                           <div className="row between">
                             <h2 className="eyebrow">
                               Review · claim {selected + 1} of {claims.length}
@@ -763,9 +777,9 @@ export default function Home() {
                             {claim.verdict?.freshness ?? "?"}
                           </div>
                           <dl>
-                            <dt>The answer says</dt>
+                            <dt>The Answer Says</dt>
                             <dd>{claim.text}</dd>
-                            <dt>The evidence says</dt>
+                            <dt>The Evidence Says</dt>
                             <dd>
                               {claim.verdict?.current_value ||
                                 claim.verdict?.note ||
@@ -781,7 +795,11 @@ export default function Home() {
                                 rel="noreferrer"
                               >
                                 {s.domain}
-                                <ArrowUpRight size={12} />
+                                <LinkSimple
+                                  weight="duotone"
+                                  aria-hidden="true"
+                                  size={12}
+                                />
                               </a>
                               <small>
                                 {s.published_date || "Undated"}
@@ -815,7 +833,11 @@ export default function Home() {
                               disabled={selected === 0}
                               onClick={() => setSelected((n) => n - 1)}
                             >
-                              <ChevronLeft size={15} />
+                              <ChevronLeft
+                                weight="duotone"
+                                aria-hidden="true"
+                                size={15}
+                              />
                               Prev
                             </button>
                             <button
@@ -825,7 +847,11 @@ export default function Home() {
                               onClick={() => setSelected((n) => n + 1)}
                             >
                               Next
-                              <ChevronRight size={15} />
+                              <ChevronRight
+                                weight="duotone"
+                                aria-hidden="true"
+                                size={15}
+                              />
                             </button>
                           </div>
                         </aside>
@@ -835,8 +861,8 @@ export default function Home() {
                 )}
                 {!running && claims.length === 0 && !state.error && (
                   <div className="panel">
-                    <Check size={22} />
-                    <h2>No time-sensitive claims found</h2>
+                    <Check weight="duotone" aria-hidden="true" size={22} />
+                    <h2>No Time-Sensitive Claims Found</h2>
                     <p>There were no dated facts to score in this answer.</p>
                   </div>
                 )}
