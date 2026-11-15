@@ -36,3 +36,29 @@ async def test_failed_claim_does_not_stop_other_claims(monkeypatch):
     assert events[-1][0]=='run.completed'
     assert len([e for e in events if e[0]=='claim.verdict'])==2
     assert result.corrected.citations[0].source_id in {s.id for c in result.claims for s in c.sources}
+
+
+@pytest.mark.asyncio
+async def test_interrupted_claim_cancels_conflict_review(monkeypatch):
+    import asyncio
+    from unittest.mock import AsyncMock
+    from backend.core.models import CheckedClaim, Source
+    started, stopped = asyncio.Event(), asyncio.Event()
+    claims=[Claim(id=f'c{i}',text='A claim about the current price.',span=(0,32)) for i in range(2)]
+    source=Source(id='s1',url='https://example.com',domain='example.com',title='Price')
+    async def verify(claim,*args):
+        if claim.id=='c1':
+            await started.wait()
+            raise asyncio.CancelledError()
+        return CheckedClaim(**claim.model_dump(),sources=[source],verdict=Verdict(label='unverifiable',confidence=.1))
+    async def conflict(*args):
+        started.set()
+        try:await asyncio.Event().wait()
+        finally:stopped.set()
+    monkeypatch.setattr(pipeline,'collect_evidence',AsyncMock(return_value=[]))
+    monkeypatch.setattr(pipeline,'extract_evidence',AsyncMock(return_value={}))
+    monkeypatch.setattr(pipeline,'verify_claim',verify)
+    monkeypatch.setattr(pipeline,'review_conflict',conflict)
+    with pytest.raises(asyncio.CancelledError):
+        await pipeline.investigate({'request':CheckRequest(answer=claims[0].text),'run':Run('offside',AsyncMock()),'claims':claims})
+    assert stopped.is_set(), 'Conflict review must not outlive the cancelled answer check'

@@ -10,6 +10,7 @@ class Run:
         self.telemetry = Telemetry()
         self.emit_callback = emit
         self.search_tasks = {}
+        self.extract_tasks = {}
         self.credit_guard = None
         self.budget_exhausted = False
         self.watch_claims = []
