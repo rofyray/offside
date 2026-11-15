@@ -39,20 +39,27 @@ async def investigate(state):
             except Exception:
                 pass
         return sources
-    groups = await asyncio.gather(*(evidence(c) for c in claims),return_exceptions=True)
-    urls = [str(s.url) for c,g in zip(claims,groups) if isinstance(g,list) and c.category in ('pricing','api_version') for s in g if s.official and (not c.stated_value or c.stated_value not in s.snippet)]
-    try:
-        extracted = await search.extract(urls,run)
-    except Exception:
-        extracted = {}
+    evidence_tasks = [asyncio.create_task(evidence(c)) for c in claims]
+    async def extract_batch():
+        groups = await asyncio.gather(*evidence_tasks,return_exceptions=True)
+        urls = [str(s.url) for c,g in zip(claims,groups) if isinstance(g,list) and c.category in ('pricing','api_version') for s in g if s.official and (not c.stated_value or c.stated_value not in s.snippet)]
+        try:
+            return await search.extract(urls,run)
+        except Exception:
+            return {}
+    extraction_task = asyncio.create_task(extract_batch())
     escalation_count = 0
     escalation_tasks = []
     checked = []
 
-    async def verify(claim,sources):
+    async def verify(claim,evidence_task):
         nonlocal escalation_count
-        if isinstance(sources,Exception):
+        try:
+            sources = await evidence_task
+        except Exception:
             sources = []
+        needs_extract = claim.category in ('pricing','api_version') and any(s.official and (not claim.stated_value or claim.stated_value not in s.snippet) for s in sources)
+        extracted = await extraction_task if needs_extract else {}
         for source in sources:
             source.snippet = extracted.get(str(source.url)) or source.snippet
         await run.emit('evidence.ready',claim_id=claim.id,sources=sources)
@@ -85,7 +92,12 @@ async def investigate(state):
                     pass
                 return False
             escalation_tasks.append(asyncio.create_task(escalate()))
-    await asyncio.gather(*(verify(c,g) for c,g in zip(claims,groups)))
+    try:
+        await asyncio.gather(*(verify(c,task) for c,task in zip(claims,evidence_tasks)))
+    finally:
+        for task in [*evidence_tasks,extraction_task]:
+            if not task.done(): task.cancel()
+        await asyncio.gather(*evidence_tasks,extraction_task,return_exceptions=True)
     checked.sort(key=lambda c:c.span[0])
     async def synthesize():
         if not checked:
