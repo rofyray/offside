@@ -15,7 +15,7 @@ flowchart LR
   C --> R[HTTPS storage bridge to private Redis]
 ```
 
-Next.js renders the interface and consumes server-sent events from FastAPI. LangGraph runs the research stages. Bifrost uses Postgres for configuration and logs and Redis Stack for semantic caching. Each app has a separate virtual key, a $15 monthly gateway budget, and a 60-request-per-minute gateway limit. Infrastructure charges are separate.
+Next.js renders the interface and consumes server-sent events from FastAPI. LangGraph runs the research stages. Bifrost uses Postgres for configuration and logs and Redis Stack for semantic caching. Each app has a separate virtual key, a monthly gateway budget, and a 60-request-per-minute gateway limit. Infrastructure charges are separate.
 
 | Agent    | Responsibility                     | Primary model     | Effort |
 | -------- | ---------------------------------- | ----------------- | ------ |
@@ -74,8 +74,6 @@ A live smoke-test helper is available in `scripts/e2e_api.py`. Pass `--base` and
 
 Deploy this directory to the linked Vercel project with `vercel deploy --prod`. `/api/py/*` routes to the single Python entry point in `api/index.py`; implementation modules live under `backend/`. Set server environment variables for each target before deploying. The Railway storage bridge keeps Redis private and isolates each app's keys.
 
-Recorded research snapshots are intentionally excluded from Git. The hosted demo includes local snapshots uploaded with the CLI. A clean clone works without them and hides the example picker. Planning, research, design, screenshots, local environment files and infrastructure credentials are also excluded from this repository.
+The hosted demo includes local snapshots. A clean clone works without them and hides the example picker.
 
 Saved links are bearer links: anyone with the URL can open them until expiry. There is no user account system. Public research is limited to six runs per ten minutes and forty per day per client. Freshness scores summarize evidence, not certainty. Undated evidence stays unplaced on the timeline. Sources can be incomplete or wrong, and citations do not replace human judgment. The app does not continuously monitor saved answers.
-
-Built with Codex assistance. The three-stage research approach was informed by ByteByteGo's deep-research architecture reference; reference and design files remain local.
