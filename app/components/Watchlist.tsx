@@ -5,6 +5,7 @@ import { ClockClockwise } from "@phosphor-icons/react/dist/ssr/ClockClockwise";
 import { Flag } from "@phosphor-icons/react/dist/ssr/Flag";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr/ArrowRight";
 import { CheckCircle } from "@phosphor-icons/react/dist/ssr/CheckCircle";
+import { useToast } from "./Toast";
 
 type Watch = {
   id: string;
@@ -62,11 +63,10 @@ const verdicts: Record<string, string> = {
 export function WatchButton({ runId }: { runId: string }) {
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
+  const notify = useToast();
   useEffect(() => {
     const controller = new AbortController();
     setSaved(false);
-    setMessage("");
     watchRequest("", { signal: controller.signal })
       .then((data) =>
         setSaved(
@@ -80,7 +80,6 @@ export function WatchButton({ runId }: { runId: string }) {
   }, [runId]);
   async function save() {
     setBusy(true);
-    setMessage("");
     try {
       await watchRequest("", {
         method: "POST",
@@ -88,32 +87,32 @@ export function WatchButton({ runId }: { runId: string }) {
         body: JSON.stringify({ run_id: runId }),
       });
       setSaved(true);
-      setMessage("Watching for 7 days. See updates in Watchlist.");
+      notify({
+        tone: "success",
+        title: "Watching for 7 days",
+        message: "See source changes and new verdicts in Watchlist.",
+      });
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Could not save this watch.",
-      );
+      notify({
+        tone: "error",
+        title: "Couldn’t save watch",
+        message: error instanceof Error ? error.message : "Please try again.",
+      });
     } finally {
       setBusy(false);
     }
   }
   const Icon = saved ? CheckCircle : Binoculars;
   return (
-    <div className="watch-action">
-      <button className="secondary" onClick={save} disabled={busy || saved}>
-        <Icon size={17} weight="duotone" aria-hidden="true" />
-        {saved ? "Watching" : busy ? "Saving" : "Watch Answer"}
-      </button>
-      {message && (
-        <p className="small muted" role="status">
-          {message}
-        </p>
-      )}
-    </div>
+    <button className="secondary" onClick={save} disabled={busy || saved}>
+      <Icon size={17} weight="duotone" aria-hidden="true" />
+      {saved ? "Watching" : busy ? "Saving" : "Watch Answer"}
+    </button>
   );
 }
 
 export default function Watchlist() {
+  const notify = useToast();
   const [watches, setWatches] = useState<Watch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -149,10 +148,13 @@ export default function Watchlist() {
     try {
       await watchRequest(`/${id}`, { method: "DELETE" });
       setWatches((items) => items.filter((w) => w.id !== id));
+      notify({ tone: "success", title: "Watch stopped" });
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Could not stop this watch.",
-      );
+      notify({
+        tone: "error",
+        title: "Couldn’t stop watch",
+        message: err instanceof Error ? err.message : "Please try again.",
+      });
     } finally {
       setStopping(null);
     }

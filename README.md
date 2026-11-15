@@ -1,4 +1,4 @@
-# <img src="public/offside-flag.svg" width="48" height="48" align="absmiddle" alt=""> OffSide
+# <img src="public/offside-logo.svg" width="32" height="48" align="absmiddle" alt=""> OffSide
 
 [Open OffSide](https://offside-agent.vercel.app/)
 

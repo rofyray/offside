@@ -202,7 +202,7 @@ export default function CheckResultView({
           <Line claims={claims} select={setSelected} />
           <section className="result-grid">
             <article>
-              <h2>The Answer, Marked Up</h2>
+              <h2>The Annotated Answer</h2>
               <MarkedAnswer
                 answer={answer}
                 claims={claims}

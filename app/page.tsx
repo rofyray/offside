@@ -1,4 +1,5 @@
 "use client";
+import { useToast } from "./components/Toast";
 import { replayExample, type Example } from "./lib/replay";
 import Examples from "./components/Examples";
 import Watchlist from "./components/Watchlist";
@@ -58,7 +59,7 @@ export default function Home() {
   const [selected, setSelected] = useState(0);
   const [tab, setTab] = useState("Corrected Answer");
   const [editing, setEditing] = useState(true);
-  const [notice, setNotice] = useState("");
+  const notify = useToast();
   const [replaying, setReplaying] = useState(false);
   const [chosen, setChosen] = useState(models);
   const [modelErrors, setModelErrors] = useState<Record<string, string>>({});
@@ -85,8 +86,14 @@ export default function Home() {
         dispatch({ type: "run.completed", data: { result } });
         setEditing(false);
       })
-      .catch((e) => setNotice(e.message));
-  }, []);
+      .catch((e) =>
+        notify({
+          tone: "error",
+          title: "Couldn’t open result",
+          message: e.message,
+        }),
+      );
+  }, [notify]);
   const running = state.status === "running";
   const claims = state.claims;
   const telemetry: Telemetry | undefined = state.telemetry;
@@ -97,9 +104,11 @@ export default function Home() {
     dispatch({ type: "reset", data: {} });
     setReplaying(true);
     setEditing(false);
-    setNotice(
-      `Recorded example from ${new Date(example.recorded_at).toLocaleDateString()}. No live searches are running.`,
-    );
+    notify({
+      tone: "info",
+      title: "Playing recorded check",
+      message: `Recorded ${new Date(example.recorded_at).toLocaleDateString()}. No live searches are running.`,
+    });
     setView("check");
     setSelected(0);
     setAnswer(String(example.input.answer));
@@ -111,7 +120,6 @@ export default function Home() {
     dispatch({ type: "reset", data: {} });
     dispatch({ type: "run.completed", data: {} });
     setEditing(true);
-    setNotice("");
     setSelected(0);
   }
   async function start() {
@@ -121,7 +129,6 @@ export default function Home() {
     abort.current = controller;
     dispatch({ type: "reset", data: {} });
     setSelected(0);
-    setNotice("");
     setEditing(false);
     setModelAnswers({});
     setModelErrors({});
@@ -175,16 +182,22 @@ export default function Home() {
   }
   async function copy(text: string) {
     if (replaying && text.includes("?run=")) {
-      setNotice(
-        "Recorded examples are available from the home page. Run a fresh check to create a saved link.",
-      );
+      notify({
+        tone: "warning",
+        title: "Recorded example",
+        message: "Run a fresh check to create a saved link.",
+      });
       return;
     }
     try {
       await navigator.clipboard.writeText(text);
-      setNotice("Copied to clipboard.");
+      notify({ tone: "success", title: "Copied to clipboard" });
     } catch {
-      setNotice("Copy failed. Select the text to copy it.");
+      notify({
+        tone: "error",
+        title: "Couldn’t copy text",
+        message: "Select the text to copy it.",
+      });
     }
   }
   return (
@@ -224,6 +237,11 @@ export default function Home() {
         </button>
       </header>
       <main>
+        {replaying && (
+          <p className="recorded-notice">
+            Recorded Example · Replays without live searches.
+          </p>
+        )}
         {view === "watchlist" ? (
           <Watchlist />
         ) : view === "api" ? (
@@ -495,11 +513,6 @@ export default function Home() {
               />
             )}
           </>
-        )}
-        {notice && (
-          <p className="notice" role="status">
-            {notice}
-          </p>
         )}
       </main>
       <footer>

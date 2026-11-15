@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ToastProvider } from "./components/Toast";
 import {
   Barlow_Condensed,
   IBM_Plex_Sans,
@@ -33,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${display.variable} ${body.variable} ${mono.variable}`}>
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );
