@@ -975,3 +975,20 @@ footer > .secondary {
   opacity: 0.65;
   font-size: 11px;
 }
+
+.examples .recorded-examples {
+  flex-basis: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 28px;
+  margin: 0 0 20px;
+}
+.examples .recorded-examples > .eyebrow,
+.examples .recorded-examples > small,
+.examples .recorded-examples > [role="alert"] {
+  grid-column: 1 / -1;
+}
+@media (max-width: 700px) {
+  .examples .recorded-examples {
+    grid-template-columns: 1fr;
+  }
+}
