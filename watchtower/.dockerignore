@@ -1,4 +1,6 @@
-__pycache__
-.pytest_cache
-*.pyc
-.env*
+# Include only the worker runtime and container configuration.
+*
+!*.py
+!requirements.txt
+!Dockerfile
+!railway.json
