@@ -1,8 +1,20 @@
-# <img src="public/offside-logo.svg" width="32" height="48" align="absmiddle" alt=""> OffSide
+<h1 align="center">
+  <img src="public/offside-logo.svg" width="32" height="48" align="absmiddle" alt=""> OffSide
+</h1>
 
-[Open OffSide](https://offside-agent.vercel.app/)
+<p align="center">
+  <a href="https://offside-agent.vercel.app/">Open OffSide</a>
+  &nbsp;·&nbsp;
+  <a href="presentations/offside-pitch-deck.pdf">Pitch Deck (PDF)</a>
+</p>
 
 AI answers can sound convincing after their facts go out of date. OffSide extracts time-sensitive claims, checks them against current web evidence, and produces a cited correction. You can paste an answer, compare answers from up to three models, or call the JSON verification API.
+
+## Demo
+
+https://github.com/user-attachments/assets/83292b52-b261-445a-a219-15ef28f335be
+
+*2:08 walkthrough · 1080p with audio*
 
 ## How it works
 
