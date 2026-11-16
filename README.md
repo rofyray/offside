@@ -14,8 +14,6 @@ AI answers can sound convincing after their facts go out of date. OffSide extrac
 
 https://github.com/user-attachments/assets/83292b52-b261-445a-a219-15ef28f335be
 
-*2:08 walkthrough · 1080p with audio*
-
 ## How it works
 
 ```mermaid
